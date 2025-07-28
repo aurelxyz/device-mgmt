@@ -28,6 +28,11 @@ const openApiSpec = docGenerator.generateDocument({
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
+// The following middleware is used as a last resort if none of the routes are matching the request
+app.use((req, res, next) => {
+  res.status(404).end("404 not found");
+});
+
 // Express error handler (to catch errors from routes and return http response with relevant status code)
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
   res

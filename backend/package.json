@@ -8,9 +8,10 @@
   "main": "server.ts",
   "scripts": {
     "start": "node src/server.ts",
-    "dev": "node --env-file=.env src/server.ts",
+    "dev": "node --watch --env-file=.env src/server.ts",
     "test": "node --test --env-file=.env",
-    "db:deploy": "npx drizzle-kit push"
+    "db:push": "npx drizzle-kit push",
+    "db:generate": "npx drizzle-kit generate"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.0.0",
