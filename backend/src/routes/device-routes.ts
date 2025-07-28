@@ -7,8 +7,20 @@ import { eq } from 'drizzle-orm';
 import { httpError, HttpErrorBody } from '../utils/http-error.ts';
 import { DeviceId, ModelId, MacAddress, DeviceStatus, ModelName, TypeId, TypeName } from '../validation/device.ts';
 import { deviceTable, deviceModelTable, deviceTypeTable } from '../db/db-schema.ts';
+import { checkApiKey } from '../utils/checkApiKey.ts';
 
 export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase) => {
+
+  const apiKeyAuth = doc.registerComponent(
+    'securitySchemes',
+    'ApiKeyAuth',
+    {
+      type: 'apiKey',
+      in: 'header',
+      name: 'X-API-KEY',
+    }
+  );
+
 
   const DeviceInfoSchema = z.object({
     deviceId: DeviceId,
@@ -36,6 +48,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     path: '/devices',
     description: 'Get devices',
     summary: 'Get Devices',
+    security: [{ [apiKeyAuth.name]: [] }],
     request: {
       query: DeviceQueryParamsSchema,
     },
@@ -48,7 +61,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     tags: ['Devices']
   });
 
-  app.get('/devices', async (req, res) => {
+  app.get('/devices', checkApiKey, async (req, res) => {
     const queryParams = DeviceQueryParamsSchema.safeParse(req.query);
     if (!queryParams.success) {
       throw httpError(400, z.prettifyError(queryParams.error));
@@ -91,6 +104,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     path: '/devices/{id}',
     description: 'Get a device by ID',
     summary: 'Get Device',
+    security: [{ [apiKeyAuth.name]: [] }],
     request: {
       params: z.object({ id: z.string() }),
     },
@@ -107,7 +121,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     tags: ['Devices']
   });
 
-  app.get('/devices/:id', async (req, res) => {
+  app.get('/devices/:id', checkApiKey, async (req, res) => {
     const id = Number(req.params.id);
     const devices: DeviceInfo[] = 
       await db
@@ -143,6 +157,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     path: '/devices',
     description: 'Create a new device',
     summary: 'Create Device',
+    security: [{ [apiKeyAuth.name]: [] }],
     request: {
       body: {
         content: { 'application/json': { schema: CreateDeviceSchema } }
@@ -161,7 +176,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     tags: ['Devices']
   });
 
-  app.post('/devices', async (req, res) => {
+  app.post('/devices', checkApiKey, async (req, res) => {
     const input = CreateDeviceSchema.safeParse(req.body);
     if (!input.success) {
       throw httpError(400, z.prettifyError(input.error));
@@ -194,6 +209,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     path: '/devices/{id}',
     description: 'Modify a device',
     summary: 'Modify Device',
+    security: [{ [apiKeyAuth.name]: [] }],
     request: {
       params: ModifyDeviceParamsSchema,
       body: {
@@ -213,7 +229,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     tags: ['Devices']
   });
 
-  app.patch('/devices/:id', async (req, res) => {
+  app.patch('/devices/:id', checkApiKey, async (req, res) => {
     const params = ModifyDeviceParamsSchema.safeParse(req.params);
     if (!params.success) {
       throw httpError(400, z.prettifyError(params.error));
@@ -246,6 +262,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     path: '/devices/{id}',
     description: 'Delete a device',
     summary: 'Delete Device',
+    security: [{ [apiKeyAuth.name]: [] }],
     request: {
       params: DeleteDeviceParamsSchema,
     },
@@ -262,7 +279,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     tags: ['Devices']
   });
 
-  app.delete('/devices/:id', async (req, res) => {
+  app.delete('/devices/:id', checkApiKey, async (req, res) => {
     const input = DeleteDeviceParamsSchema.safeParse(req.params);
     if (!input.success) {
       throw httpError(400, z.prettifyError(input.error));

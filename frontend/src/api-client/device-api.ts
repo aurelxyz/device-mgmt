@@ -1,3 +1,4 @@
+import api from './api-client';
 
 type DeviceFilters = {
   mac?: string,
@@ -7,7 +8,7 @@ type DeviceFilters = {
 }
 
 export const getDevices = async (filters: DeviceFilters) => {
-  let url = 'http://localhost:3001/devices';
+  let url = 'http://localhost:3001/devices';                          // TODO: localhost
   if (filters) {
     const query = Object.entries(filters)
       .filter(([key, val]) => val)
@@ -18,7 +19,6 @@ export const getDevices = async (filters: DeviceFilters) => {
     }
   }
   
-  const res = await fetch(url);     // TODO: localhost
-  const data = await res.json();
+  const data = await api.get(url);
   return data;
 }
