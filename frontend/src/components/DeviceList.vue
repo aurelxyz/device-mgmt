@@ -1,29 +1,32 @@
 <script setup lang="ts">
 import DeviceDetail from './DeviceDetail.vue';
-import { type DeviceProps } from './DeviceMgmt.vue';
+import { type DeviceInfo } from './DeviceMgmt.vue';
 
 defineProps<{
-  devices: DeviceProps[]
+  devices: DeviceInfo[]
 }>()
 </script>
 
 <template>
-  <div class="panel">
-    <div class="device-list" v-for="device in devices" :key="device.id">
-      <DeviceDetail 
-        :id="device.id" 
-        :mac="device.mac"
-        :model="device.model"
-        :type="device.type"
-        :status="device.status"
-      />
+  <div class="panel device-list">
+    
+    <div class="device-list-item" v-for="device in devices" :key="device.deviceId">
+      <DeviceDetail :device="device" />
     </div>
   </div>
 </template>
 
 <style scoped>
 .device-list {
+  min-width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.device-list-item {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-bottom: solid 1px var(--text);
 }
 </style>

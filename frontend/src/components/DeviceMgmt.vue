@@ -3,72 +3,100 @@ import { ref } from 'vue'
 import { getDevices } from '../api-client/device-api.ts'
 import DeviceList from '../components/DeviceList.vue'
 
-type DeviceFromApi = {
-  id: number,
-  modelId: number,
+export type DeviceInfo = {
+  deviceId: number,
   mac: string,
   status: string
-}
-
-export type DeviceProps = {
-  id: number,
-  model: string,
-  mac: string,
-  status: string,
-  type: string  
+  modelId: number,
+  modelName: string,
+  typeId: number,
+  typeName: string
 }
 
 const loading = ref(false)
-const devices = ref<DeviceProps[] | null>(null)
+const devices = ref<DeviceInfo[] | null>(null)
 const error = ref(null)
+
+const macFilter = ref("");
+const statusFilter = ref("");
+const modelFilter = ref("");
+const typeFilter = ref("");
 
 fetchData()
 
 async function fetchData() {
-  error.value = devices.value = null
-  loading.value = true
+  devices.value = null;
+  error.value = null;
+  loading.value = true;
   
   try {
-    const result: DeviceFromApi[] = await getDevices();       // TODO: validate?
-    devices.value = result.map(d => ({
-      id: d.id,
-      model: d.modelId.toString(),                  // TODO
-      mac: d.mac,
-      status: d.status,
-      type: "type of" + d.modelId.toString(),      // TODO                
-    }));
-    console.log(devices.value);
+    const filters =  { 
+      mac: macFilter.value, 
+      status: statusFilter.value,
+      model: modelFilter.value,
+      type: typeFilter.value 
+    };
+    await getDevices(filters); 
+    devices.value = await getDevices(filters); 
   } catch (err: any) {
     error.value = err.toString()
   } finally {
     loading.value = false
   }
 }
+
 </script>
 
 <template>
   <div class="devices">
     <h1>Devices</h1>
-    <div>
-      <div v-if="loading" class="loading">Loading...</div>
-
-      <div v-if="error" class="error">{{ error }}</div>
-
-      <div v-if="devices" class="content">
-        <DeviceList :devices="devices" />
-      </div>
+    <div class="panel">
+      <form class="filters" @submit.prevent="fetchData" autocomplete="off">
+        <div class="form-group">
+          <label for="mac">Adress Mac</label>
+          <input type="text" v-model="macFilter" id="mac" />
+        </div>
+        <div class="form-group">
+          <label for="status">Etat</label>
+          <input type="text" v-model="statusFilter" id="status" />
+        </div>
+        <div class="form-group">
+          <label for="model">Modèle</label>
+          <input type="text" v-model="modelFilter" id="model" />
+        </div>
+        <div class="form-group">
+          <label for="type">Type</label>
+          <input type="text" v-model="typeFilter" id="type" />
+        </div>
+        <input type="submit" class="button-filter" value="Filtrer" />
+      </form>
     </div>
+    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="error" class="error">{{ error }}</div>
+    <DeviceList v-if="devices" :devices="devices" />
   </div>
 </template>
 
 <style>
-@media (min-width: 1024px) {
-  .devices {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+.devices {
+  min-height: 100vh;
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.form-group {
+  display: grid;
+}
+
+.button-filter {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 </style>

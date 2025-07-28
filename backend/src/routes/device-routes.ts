@@ -5,7 +5,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 
 import { httpError, HttpErrorBody } from '../utils/http-error.ts';
-import { CreateDeviceSchema, ModifyDeviceSchema, DeviceId, ModelId, MacAddress, DeviceStatus, ModelName, TypeId, TypeName } from '../validation/device.ts';
+import { DeviceId, ModelId, MacAddress, DeviceStatus, ModelName, TypeId, TypeName } from '../validation/device.ts';
 import { deviceTable, deviceModelTable, deviceTypeTable } from '../db/db-schema.ts';
 
 export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase) => {
@@ -132,6 +132,12 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
 
   // --------------------------------------------------------------------------------
   // POST
+  const CreateDeviceSchema = z.object({
+    modelId: ModelId,
+    mac: MacAddress,
+    status: DeviceStatus
+  }).openapi({ description: 'Create Device Schema' });
+
   doc.registerPath({
     method: 'post',
     path: '/devices',
@@ -177,6 +183,11 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
   // --------------------------------------------------------------------------------
   // PATCH
   const ModifyDeviceParamsSchema = z.object({ id: z.coerce.number().int() });
+
+  const ModifyDeviceSchema = z.object({
+    mac: MacAddress.optional(),
+    status: DeviceStatus.optional()
+  }).openapi({ description: 'Modify Device Schema' });
 
   doc.registerPath({
     method: 'patch',

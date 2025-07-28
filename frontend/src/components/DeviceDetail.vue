@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import { type DeviceProps } from './DeviceMgmt.vue';
+import { type DeviceInfo } from './DeviceMgmt.vue';
 
-defineProps<DeviceProps>()
+defineProps<{
+  device: DeviceInfo
+}>()
 </script>
 
 <template>
   <div class="device-detail">
-    <div>{{ mac }}</div>
-    <div>{{ model }}</div>
-    <div>{{ type }}</div>
-    <div>{{ status }}</div>
+    <h3 class="mac">Adresse MAC: {{ device.mac }}</h3>
+    <div>Etat: {{ device.status }}</div>
+    <div>Modèle: {{ device.modelName }}</div>
+    <div>Type: {{ device.typeName }}</div>
   </div>
 </template>
 
 <style scoped>
 .device-detail {
-  display: flex;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  row-gap: 8px;
+  column-gap: 50px;
+}
+
+.mac {
+  grid-column: 1 / -1;
 }
 </style>
