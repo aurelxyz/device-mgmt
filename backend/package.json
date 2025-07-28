@@ -1,0 +1,35 @@
+{
+  "name": "device-mgmt-backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server.ts",
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --env-file=.env src/server.ts",
+    "test": "node --test --env-file=.env",
+    "db:deploy": "npx drizzle-kit push"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.0.0",
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.44.3",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.1.0",
+    "@types/supertest": "^6.0.3",
+    "@types/swagger-ui-express": "^4.1.8",
+    "drizzle-kit": "^0.31.4",
+    "supertest": "^7.1.4",
+    "typescript": "^5.8.3"
+  }
+}

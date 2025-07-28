@@ -1,0 +1,42 @@
+:root {
+  --bg-body: hsl(240, 20%, 96%);
+  --bg-panel: hsl(240, 10%, 99%);
+  --bg-highlight: hsl(240, 10%, 100%);
+  --border-panel: hsl(240, 10%, 91%);
+  --border-highlight: hsl(240, 10%, 97%);
+  --gradient-highlight: linear-gradient(to bottom, var(--bg-highlight), 1px, var(--bg-panel) 4px);
+  --text: hsl(240, 10%, 4%);
+  --text-muted: hsla(240, 10%, 4%, 0.5);
+  --primary: hsl(221, 76.8%, 64.5%);
+  --shadow: 0px 0.2px 2px hsl(0, 0%, 0%, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  font-family: sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 15px;
+  color: var(--text);
+  background: var(--bg-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.panel {
+  background: var(--gradient-highlight);
+  border: solid 1px var(--border-panel);
+  border-top: solid 1px var(--border-highlight);
+  border-radius: 0.5rem;
+  padding: 1rem 1.5rem;
+  box-shadow: var(--shadow);
+}
