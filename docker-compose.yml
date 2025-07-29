@@ -29,9 +29,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: devicedb
     ports:
-      - "5432:5432"
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
+      - "15432:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - postgres_data:/var/lib/postgresql/data
 
 # volumes:
 #   postgres_data:

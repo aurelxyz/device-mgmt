@@ -40,6 +40,7 @@ app.use((req, res, next) => {
 
 // Express error handler (to catch errors from routes and return http response with relevant status code)
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
+  // console.log(err);
   res
     .status(err.statusCode || 500)
     .json({ 

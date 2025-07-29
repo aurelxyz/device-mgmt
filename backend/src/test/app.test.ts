@@ -3,10 +3,16 @@ import app from '../app.ts';
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
+const apiKey = process.env.API_KEYS?.split(',')?.[0];
+if (!apiKey) {
+  throw new Error('Environment variable API_KEYS is missing');
+}
+
 describe('GET /devices', () => {
   it('responds with an array of devices', async () => {
     const res = await request(app)
       .get('/devices')
+      .set({ 'X-API-KEY': apiKey })
       .expect('Content-Type', /json/)
       .expect(200);
 
@@ -24,6 +30,7 @@ describe('POST /devices', () => {
 
     const res = await request(app)
       .post('/devices')
+      .set({ 'X-API-KEY': apiKey })
       .send(newDevice)
       .expect('Content-Type', /json/)
       .expect(200);
@@ -39,6 +46,7 @@ describe('POST /devices', () => {
 
     const res = await request(app)
       .post('/devices')
+      .set({ 'X-API-KEY': apiKey })
       .send(newDevice)
       .expect('Content-Type', /json/)
       .expect(400);
