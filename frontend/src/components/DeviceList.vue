@@ -60,8 +60,9 @@ fetchData()
         <label for="type">Type</label>
         <input type="text" v-model="typeFilter" id="type" />
       </div>
-      <input type="submit" class="button-submit" value="Filtrer" />
+      <div class="separator"></div>
       <p v-if="loading" class="loading">Chargement...</p>
+      <input type="submit" class="button-submit" value="Filtrer" />
     </form>
     
     <div v-if="error" class="error">{{ error }}</div>
@@ -99,6 +100,12 @@ fetchData()
 }
 
 .button-submit {
+  width: 80px;
+  height: 30px;
   padding: 5px 20px;
+}
+
+.separator {
+  margin-left: auto;
 }
 </style>

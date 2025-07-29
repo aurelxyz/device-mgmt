@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { addDevice, type DeviceAddInfo } from '../api-client/device-api.ts'
+import { ref } from 'vue';
+import { addDevice, type DeviceAddInfo } from '../api-client/device-api.ts';
+import { getDeviceModels, type DeviceModel } from '../api-client/model-api.ts';
 
 const emit = defineEmits<{
   create: []
@@ -10,8 +11,10 @@ const loading = ref(false);
 const success = ref(false);
 const error = ref(null);
 
+const models = ref<DeviceModel[] | null>(null);
+
 const mac = ref("");
-const status = ref("");
+const status = ref("stock");
 const modelId = ref("");
 
 const postData = async () => {
@@ -28,7 +31,7 @@ const postData = async () => {
     await addDevice(newDeviceData); 
     success.value = true;
     mac.value = "";
-    status.value = "";
+    status.value = "stock";
     modelId.value = "";
     emit('create');
   } catch (err: any) {
@@ -43,6 +46,16 @@ const resetMessages = () => {
   success.value = false;
   error.value = null;
 }
+
+const fetchModels = async () => {
+  try {
+    models.value = await getDeviceModels({}); 
+  } catch (err: any) {
+    //
+  }
+}
+
+fetchModels()
 </script>
 
 <template>
@@ -51,20 +64,28 @@ const resetMessages = () => {
     <form class="form" @submit.prevent="postData" autocomplete="off" :disabled="loading">
       <div class="form-group">
         <label for="mac">Adresse MAC</label>
-        <input type="text" v-model="mac" id="mac" @change="resetMessages" />
+        <input type="text" v-model="mac" id="mac" @change="resetMessages" required />
       </div>
       <div class="form-group">
         <label for="status">Etat</label>
-        <input type="text" v-model="status" id="status" @change="resetMessages" />
+        <select v-model="status" id="status" @change="resetMessages" required>
+          <option value="stock">stock</option>
+          <option value="installé">installé</option>
+          <option value="maintenance">maintenance</option>
+        </select>
       </div>
       <div class="form-group">
         <label for="model">Modèle</label>
-        <input type="text" v-model="modelId" id="model" @change="resetMessages" />
+        <select v-model="modelId" id="model" @change="resetMessages" required>
+          <option disabled value="">Sélectionner</option>
+          <option v-for="model in models" :value="model.modelId">{{ model.modelName }} ({{ model.typeName }})</option>
+        </select>
       </div>
-      <input type="submit" class="button-submit" value="Ajouter" :disabled="loading" />
-      <p v-if="loading">🔄 Enregistrement en cours...</p>
+      <div class="separator"></div>
       <p v-if="success">✔️ Enregistré !</p>
       <p v-if="error">❌ Une erreur est survenue</p>
+      <p v-if="loading">🔄 Enregistrement en cours...</p>
+      <input type="submit" class="button-submit" value="Ajouter" :disabled="loading" />
     </form>
   </div>
 </template>
@@ -89,6 +110,12 @@ const resetMessages = () => {
 }
 
 .button-submit {
+  width: 80px;
+  height: 30px;
   padding: 5px 20px;
+}
+
+.separator {
+  margin-left: auto;
 }
 </style>
