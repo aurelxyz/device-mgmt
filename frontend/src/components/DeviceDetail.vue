@@ -1,42 +1,77 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { deleteDevice, type DeviceInfo } from '../api-client/device-api';
+import { deleteDevice, modifyDevice, type DeviceInfo } from '../api-client/device-api';
 
-defineProps<{
+const { device } = defineProps<{
   device: DeviceInfo
 }>();
 
 const emit = defineEmits<{
   delete: [id: number]
+  change: [id: number]
 }>();
 
 const loading = ref(false);
 const error = ref(null);
 
-const deleteData = async (deviceId: number) => {
+const deleteData = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    await deleteDevice(deviceId); 
+    await deleteDevice(device.deviceId); 
   } catch (err: any) {
     error.value = err.toString()
   } finally {
     loading.value = false;
-    emit('delete', deviceId);
+    emit('delete', device.deviceId);
+  }
+}
+
+const oldStatus = ref(device.status);
+const newStatus = ref(device.status);
+const loadingStatus = ref(false);
+const errorStatus = ref(null);
+
+const statuses = [
+  { name: 'stock', canTransitionFrom: ['stock', 'maintenance'] }, 
+  { name: 'installé', canTransitionFrom: ['installé', 'stock'] }, 
+  { name: 'maintenance', canTransitionFrom: ['maintenance', 'installé'] }
+];
+
+const modifyStatus = async () => {
+  loadingStatus.value = true;
+  errorStatus.value = null;
+
+  try {
+    await modifyDevice(device.deviceId, newStatus.value); 
+    oldStatus.value = newStatus.value;
+  } catch (err: any) {
+    errorStatus.value = err.toString()
+  } finally {
+    loadingStatus.value = false;
+    emit('change', device.deviceId);
   }
 }
 </script>
 
 <template>
   <div class="device-detail">
-    <h3 class="mac">Adresse MAC: {{ device.mac }}</h3>
-    <div>Etat: {{ device.status }}</div>
-    <div>Modèle: {{ device.modelName }}</div>
-    <div>Type: {{ device.typeName }}</div>
+    <p class="mac">
+      <span class="label">Adresse MAC : </span><span>{{ device.mac }}</span>
+    </p>
+    <div class="status">
+      <span class="label">Etat : </span>
+      <select v-model="newStatus" id="status" required>
+        <option v-for="s in statuses" :value="s.name" :disabled="!s.canTransitionFrom.includes(oldStatus)">{{ s.name }}</option>
+      </select>
+      <button class="button-modif-status" @click="modifyStatus()" :disabled="newStatus === oldStatus">Enregistrer</button>
+    </div>
+    <div><span class="label">Modèle : </span>{{ device.modelName }}</div>
+    <div><span class="label">Type : </span>{{ device.typeName }}</div>
     <p v-if="loading">🔄 En cours...</p>
-    <p v-else-if="error">❌ Une erreur est survenue: {{ error }}</p>
-    <button class="button-delete" @click="deleteData(device.deviceId)" :disabled="loading">Supprimer</button>
+    <p v-else-if="error">❌ Une erreur est survenue</p>
+    <button class="button-delete" @click="deleteData()" :disabled="loading">Supprimer</button>
   </div>
 </template>
 
@@ -52,8 +87,9 @@ const deleteData = async (deviceId: number) => {
   border-radius: 3px;
 }
 
-.mac {
+.status {
   grid-column: 1 / -1;
+  grid-row: 2;
 }
 
 .button-delete {
@@ -61,5 +97,13 @@ const deleteData = async (deviceId: number) => {
   grid-column: -1;
   grid-row: 1 / span 2;
   margin: auto;
+}
+
+.button-modif-status {
+  margin-left: 5px;
+}
+
+.label {
+  color: var(--text-muted);
 }
 </style>

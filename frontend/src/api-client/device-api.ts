@@ -51,3 +51,8 @@ export const addDevice = async (info: DeviceAddInfo) => {
 export const deleteDevice = async (id: number) => {
   return await api.delete(apiUrl + '/devices/' + id);
 }
+
+// -----------------------------------------------------------------------------------------
+export const modifyDevice = async (id: number, newStatus: string) => {
+  return await api.patch(apiUrl + '/devices/' + id, { status: newStatus });
+}

@@ -50,12 +50,16 @@ const resetMessages = () => {
 const fetchModels = async () => {
   try {
     models.value = await getDeviceModels({}); 
-  } catch (err: any) {
-    //
-  }
+  } catch (err: any) {}
 }
 
 fetchModels()
+
+const statuses = [
+  'stock', 
+  'installé', 
+  'maintenance'
+];
 </script>
 
 <template>
@@ -69,9 +73,7 @@ fetchModels()
       <div class="form-group">
         <label for="status">Etat</label>
         <select v-model="status" id="status" @change="resetMessages" required>
-          <option value="stock">stock</option>
-          <option value="installé">installé</option>
-          <option value="maintenance">maintenance</option>
+          <option v-for="s in statuses" :value="s">{{ s }}</option>
         </select>
       </div>
       <div class="form-group">
