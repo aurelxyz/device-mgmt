@@ -19,6 +19,18 @@
   font-weight: normal;
 }
 
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}
+
+input {
+  border: solid 1px hsl(0, 0%, 75%);
+  border-radius: 3px;
+}
+
 body {
   min-height: 100vh;
   font-family: sans-serif;
