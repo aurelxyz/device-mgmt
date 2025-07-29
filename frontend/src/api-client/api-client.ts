@@ -1,4 +1,5 @@
-const apiKey = '1234';        // TODO
+import * as appStore from '../stores/app-store';
+
 
 const makeFetchRequest = (method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') => 
   async (route: string, data?: any) => {       // TODO: any
@@ -6,7 +7,7 @@ const makeFetchRequest = (method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') =
       method,
       headers: {
         "Content-Type": "application/json",
-        'X-API-KEY': apiKey
+        'X-API-KEY': appStore.get().apiKey ?? ''
       },
       body: JSON.stringify(data)
     }

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { addDevice, type DeviceAddInfo } from '../api-client/device-api.ts';
 import { getDeviceModels, type DeviceModel } from '../api-client/model-api.ts';
+
+const { fetchDataTrigger } = defineProps<{
+  fetchDataTrigger: number 
+}>();
 
 const emit = defineEmits<{
   create: []
@@ -12,6 +16,7 @@ const success = ref(false);
 const error = ref(null);
 
 const models = ref<DeviceModel[] | null>(null);
+const errorModels = ref(null);
 
 const mac = ref("");
 const status = ref("stock");
@@ -35,9 +40,9 @@ const postData = async () => {
     modelId.value = "";
     emit('create');
   } catch (err: any) {
-    error.value = err.toString()
+    error.value = err.toString();
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
@@ -50,8 +55,14 @@ const resetMessages = () => {
 const fetchModels = async () => {
   try {
     models.value = await getDeviceModels({}); 
-  } catch (err: any) {}
+    errorModels.value = null;
+  } catch (err: any) {
+    errorModels.value = err;
+    models.value = null;
+  }
 }
+
+watch(() => fetchDataTrigger, fetchModels);
 
 fetchModels()
 
@@ -65,29 +76,31 @@ const statuses = [
 <template>
   <div class="panel device-create-container">
     <h2>Ajouter</h2>
-    <form class="form" @submit.prevent="postData" autocomplete="off" :disabled="loading">
-      <div class="form-group">
-        <label for="mac">Adresse MAC</label>
-        <input type="text" v-model="mac" id="mac" @change="resetMessages" required />
-      </div>
-      <div class="form-group">
-        <label for="status">Etat</label>
-        <select v-model="status" id="status" @change="resetMessages" required>
-          <option v-for="s in statuses" :value="s">{{ s }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="model">Modèle</label>
-        <select v-model="modelId" id="model" @change="resetMessages" required>
-          <option disabled value="">Sélectionner</option>
-          <option v-for="model in models" :value="model.modelId">{{ model.modelName }} ({{ model.typeName }})</option>
-        </select>
-      </div>
-      <div class="separator"></div>
-      <p v-if="success">✔️ Enregistré !</p>
-      <p v-if="error">❌ Une erreur est survenue</p>
-      <p v-if="loading">🔄 Enregistrement en cours...</p>
-      <input type="submit" class="button-submit" value="Ajouter" :disabled="loading" />
+    <form class="form" @submit.prevent="postData" autocomplete="off" :disabled="loading || errorModels">
+      <fieldset class="fieldset" :disabled="loading || errorModels ? true : false">
+        <div class="form-group">
+          <label for="mac">Adresse MAC</label>
+          <input type="text" v-model="mac" id="mac" @change="resetMessages" required />
+        </div>
+        <div class="form-group">
+          <label for="status">Etat</label>
+          <select v-model="status" id="status" @change="resetMessages" required>
+            <option v-for="s in statuses" :value="s" :key="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="model">Modèle</label>
+          <select v-model="modelId" id="model" @change="resetMessages" required>
+            <option disabled value="">Sélectionner</option>
+            <option v-for="model in models" :value="model.modelId" :key="model.modelId">{{ model.modelName }} ({{ model.typeName }})</option>
+          </select>
+        </div>
+        <div class="separator"></div>
+        <p v-if="success">✔️ Enregistré !</p>
+        <p v-if="error">❌ Une erreur est survenue</p>
+        <p v-if="loading">🔄 Enregistrement en cours...</p>
+        <input type="submit" class="button-submit" value="Ajouter" :disabled="loading" />
+      </fieldset>
     </form>
   </div>
 </template>
@@ -100,11 +113,12 @@ const statuses = [
   gap: 5px;
 }
 
-.form {
+.fieldset {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
+  border: none;
 }
 
 .form-group {

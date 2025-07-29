@@ -30,6 +30,7 @@ const fetchData = async () => {
     devices.value = await getDevices(filters); 
   } catch (err: any) {
     error.value = err.toString()
+    devices.value = null;
   } finally {
     loading.value = false
   }
@@ -62,14 +63,12 @@ fetchData()
       </div>
       <div class="separator"></div>
       <p v-if="loading" class="loading">Chargement...</p>
+      <div v-if="error" class="error">❌ {{ error }}</div>
       <input type="submit" class="button-submit" value="Filtrer" />
     </form>
     
-    <div v-if="error" class="error">{{ error }}</div>
-    <div v-else class="device-list">
-      <div class="device-list-item" v-for="device in devices" :key="device.deviceId">
-        <DeviceDetail :device="device" @delete="fetchData" />
-      </div>
+    <div class="device-list">
+      <DeviceDetail v-for="device in devices" :key="device.deviceId" :device="device" @delete="fetchData" />
     </div>
   </div>
 </template>

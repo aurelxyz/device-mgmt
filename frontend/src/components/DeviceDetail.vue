@@ -63,7 +63,7 @@ const modifyStatus = async () => {
     <div class="status">
       <span class="label">Etat : </span>
       <select v-model="newStatus" id="status" required>
-        <option v-for="s in statuses" :value="s.name" :disabled="!s.canTransitionFrom.includes(oldStatus)">{{ s.name }}</option>
+        <option v-for="s in statuses" :value="s.name" :disabled="!s.canTransitionFrom.includes(oldStatus)" :key="s.name">{{ s.name }}</option>
       </select>
       <button class="button-modif-status" @click="modifyStatus()" :disabled="newStatus === oldStatus">Enregistrer</button>
     </div>
