@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue';
 import DeviceDetail from './DeviceDetail.vue';
-import { type DeviceInfo } from './DeviceMgmt.vue';
-import { getDevices } from '../api-client/device-api.ts'
+import { getDevices, type DeviceFilters, type DeviceInfo } from '../api-client/device-api';
+
+const { fetchDataTrigger } = defineProps<{
+  fetchDataTrigger: number
+}>();
 
 const loading = ref(false)
 const devices = ref<DeviceInfo[] | null>(null)
@@ -13,21 +16,17 @@ const statusFilter = ref("");
 const modelFilter = ref("");
 const typeFilter = ref("");
 
-fetchData()
-
-async function fetchData() {
-  devices.value = null;
+const fetchData = async () => {
   error.value = null;
   loading.value = true;
   
   try {
-    const filters =  { 
+    const filters: DeviceFilters =  { 
       mac: macFilter.value, 
       status: statusFilter.value,
       model: modelFilter.value,
       type: typeFilter.value 
     };
-    await getDevices(filters); 
     devices.value = await getDevices(filters); 
   } catch (err: any) {
     error.value = err.toString()
@@ -35,6 +34,10 @@ async function fetchData() {
     loading.value = false
   }
 }
+
+watch(() => fetchDataTrigger, fetchData);
+
+fetchData()
 </script>
 
 <template>
@@ -57,14 +60,14 @@ async function fetchData() {
         <label for="type">Type</label>
         <input type="text" v-model="typeFilter" id="type" />
       </div>
-      <input type="submit" class="button-filter" value="Filtrer" />
+      <input type="submit" class="button-submit" value="Filtrer" />
+      <p v-if="loading" class="loading">Chargement...</p>
     </form>
     
-    <div v-if="loading" class="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
-    <div v-if="devices" class="device-list">
+    <div v-else class="device-list">
       <div class="device-list-item" v-for="device in devices" :key="device.deviceId">
-        <DeviceDetail :device="device" />
+        <DeviceDetail :device="device" @delete="fetchData" />
       </div>
     </div>
   </div>
@@ -86,6 +89,7 @@ async function fetchData() {
 
 .filters {
   display: flex;
+  align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -94,7 +98,7 @@ async function fetchData() {
   display: grid;
 }
 
-.button-filter {
+.button-submit {
   padding: 5px 20px;
 }
 </style>

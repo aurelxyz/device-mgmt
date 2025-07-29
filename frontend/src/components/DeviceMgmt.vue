@@ -1,21 +1,16 @@
 <script setup lang="ts">
-import DeviceList from '../components/DeviceList.vue'
+import DeviceList from '../components/DeviceList.vue';
+import DeviceCreate from '../components/DeviceCreate.vue';
+import { ref } from 'vue';
 
-export type DeviceInfo = {
-  deviceId: number,
-  mac: string,
-  status: string
-  modelId: number,
-  modelName: string,
-  typeId: number,
-  typeName: string
-};
+const fetchDataTrigger = ref(0);
 </script>
 
 <template>
   <div class="devices">
     <h1>Appareils</h1>
-    <DeviceList />
+    <DeviceCreate @create="fetchDataTrigger++"/>
+    <DeviceList :fetchDataTrigger="fetchDataTrigger" />
   </div>
 </template>
 
