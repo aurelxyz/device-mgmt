@@ -21,7 +21,6 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     }
   );
 
-
   const DeviceInfoSchema = z.object({
     deviceId: DeviceId,
     mac: MacAddress,
@@ -52,7 +51,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     request: {
       query: DeviceQueryParamsSchema,
     },
-    responses: {
+    responses: {                                                                    // TODO: add 401
       200: {
         description: 'Devices returned',
         content: { 'application/json': { schema: z.array(DeviceInfoSchema) } }
@@ -239,13 +238,13 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       throw httpError(400, z.prettifyError(input.error));
     }
 
-    const inserted = 
+    const updated = 
       await db
         .update(deviceTable)
         .set(input.data)
         .where(eq(deviceTable.id, params.data.id))
-        .returning({ insertedId: deviceTable.id });
-    const id = inserted[0]?.insertedId;
+        .returning({ updatedId: deviceTable.id });
+    const id = updated[0]?.updatedId;
     if (!id) {
       throw httpError(404, 'Device not found');
     }

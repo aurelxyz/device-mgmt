@@ -4,8 +4,11 @@ import swaggerUi from 'swagger-ui-express';
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
 import { type HttpError } from './utils/http-error.ts'
-import * as deviceRoutes from './routes/device-routes.ts';
 import * as dbClient from './db/db-client.ts';
+
+import * as deviceRoutes from './routes/device-routes.ts';
+import * as typeRoutes from './routes/type-routes.ts';
+import * as modelRoutes from './routes/model-routes.ts';
 
 const app = express();
 app.use(cors());            // Enable CORS for all routes
@@ -16,6 +19,8 @@ const db = await dbClient.connect();
 const doc = new OpenAPIRegistry();
 
 deviceRoutes.register(app, doc, db);
+typeRoutes.register(app, doc, db);
+modelRoutes.register(app, doc, db);
 
 // Generate api docs and serve with swaggerUi
 const docGenerator = new OpenApiGeneratorV3(doc.definitions);
@@ -23,7 +28,7 @@ const openApiSpec = docGenerator.generateDocument({
   openapi: '3.0.0',
   info: {
     title: 'Device Management API',
-    version: '1.0.0',
+    version: '0.1.0',
   }
 });
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
