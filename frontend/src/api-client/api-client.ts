@@ -2,7 +2,7 @@ import * as appStore from '../stores/app-store';
 
 
 const makeFetchRequest = (method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') => 
-  async (route: string, data?: any) => {       // TODO: any
+  async (route: string, data?: any) => {
     const req = {
       method,
       headers: {

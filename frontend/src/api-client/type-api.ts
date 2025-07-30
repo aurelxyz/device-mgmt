@@ -1,6 +1,6 @@
 import api from './api-client';
 
-const apiUrl = 'http://localhost:3001';     // TODO
+const apiUrl = 'http://localhost:3001';     // TODO: The api url has to be made configurable
 
 // -----------------------------------------------------------------------------------------
 export type DeviceTypeFilters = {

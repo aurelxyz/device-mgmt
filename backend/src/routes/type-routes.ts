@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, ilike } from 'drizzle-orm';
 
 import { httpError, HttpErrorBody } from '../utils/http-error.ts';
 import { TypeId, TypeName } from '../validation/device.ts';
@@ -67,6 +67,10 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       throw httpError(400, z.prettifyError(queryParams.error));
     }
 
+    const {
+      name: filterName, 
+    } = queryParams.data;
+
     let deviceTypes: DeviceTypeInfo[] = 
       await db
         .select({
@@ -74,12 +78,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
           typeName: deviceTypeTable.name
         })
         .from(deviceTypeTable)
-
-    const {
-      name: filterName, 
-    } = queryParams.data;
-
-    if (filterName) deviceTypes = deviceTypes.filter(d => d.typeName.includes(filterName));
+        .where(filterName ? ilike(deviceTypeTable.name, `%${filterName}%`) : undefined)
     
     res.json(deviceTypes);
   });

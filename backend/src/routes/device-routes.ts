@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, ilike, and } from 'drizzle-orm';
 
 import { httpError, HttpErrorBody } from '../utils/http-error.ts';
 import { DeviceId, ModelId, MacAddress, DeviceStatus, ModelName, TypeId, TypeName } from '../validation/device.ts';
@@ -28,7 +28,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     500: { description: 'Server error', content: { 'application/json': { schema: HttpErrorBody } } },
   }
 
-  
+
   const DeviceInfoSchema = z.object({
     deviceId: DeviceId,
     mac: MacAddress,
@@ -75,6 +75,13 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       throw httpError(400, z.prettifyError(queryParams.error));
     }
 
+    const {
+        mac: filterMac, 
+        model: filterModel,
+        type: filterType,
+        status: filterStatus
+      } = queryParams.data;
+
     let devices: DeviceInfo[] = 
       await db
         .select({
@@ -88,19 +95,15 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         })
         .from(deviceTable)
         .innerJoin(deviceModelTable, eq(deviceModelTable.id, deviceTable.modelId))
-        .innerJoin(deviceTypeTable, eq(deviceTypeTable.id, deviceModelTable.typeId));
-
-    const {
-        mac: filterMac, 
-        model: filterModel,
-        type: filterType,
-        status: filterStatus
-      } = queryParams.data;
-
-    if (filterMac) devices = devices.filter(d => d.mac.includes(filterMac));                // TODO: apply filters in SQL query
-    if (filterModel) devices = devices.filter(d => d.modelName.includes(filterModel));
-    if (filterType) devices = devices.filter(d => d.typeName.includes(filterType));
-    if (filterStatus) devices = devices.filter(d => d.status?.includes(filterStatus));
+        .innerJoin(deviceTypeTable, eq(deviceTypeTable.id, deviceModelTable.typeId))
+        .where(
+          and(
+            (filterMac ? ilike(deviceTable.mac, `%${filterMac}%`) : undefined),
+            (filterModel ? ilike(deviceModelTable.name, `%${filterModel}%`) : undefined),
+            (filterType ? ilike(deviceTypeTable.name, `%${filterType}%`) : undefined),
+            (filterStatus ? eq(deviceTable.status, filterStatus) : undefined),
+          )      
+        );
     
     res.json(devices);
   });

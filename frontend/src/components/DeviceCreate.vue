@@ -31,7 +31,7 @@ const postData = async () => {
     const newDeviceData: DeviceAddInfo =  { 
       mac: mac.value, 
       status: status.value,
-      modelId: Number(modelId.value),   // TODO
+      modelId: Number(modelId.value),
     };
     await addDevice(newDeviceData); 
     success.value = true;

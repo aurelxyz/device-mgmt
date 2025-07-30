@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, ilike, and } from 'drizzle-orm';
 
 import { httpError, HttpErrorBody } from '../utils/http-error.ts';
 import { ModelId, ModelName, TypeId, TypeName } from '../validation/device.ts';
@@ -70,6 +70,11 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       throw httpError(400, z.prettifyError(queryParams.error));
     }
 
+    const {
+      name: filterModel,
+      type: filterType,
+    } = queryParams.data;
+
     let deviceModels: DeviceModel[] = 
       await db
         .select({
@@ -79,15 +84,13 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
           typeName: deviceTypeTable.name
         })
         .from(deviceModelTable)
-        .innerJoin(deviceTypeTable, eq(deviceTypeTable.id, deviceModelTable.typeId));
-
-    const {
-      name: filterModel,
-      type: filterType,
-    } = queryParams.data;
-
-    if (filterModel) deviceModels = deviceModels.filter(d => d.modelName.includes(filterModel));      // TODO: filter in db query
-    if (filterType) deviceModels = deviceModels.filter(d => d.typeName.includes(filterType));
+        .innerJoin(deviceTypeTable, eq(deviceTypeTable.id, deviceModelTable.typeId))
+        .where(
+          and(
+            (filterModel ? ilike(deviceModelTable.name, `%${filterModel}%`) : undefined),
+            (filterType ? ilike(deviceTypeTable.name, `%${filterType}%`) : undefined),
+          )      
+        );
     
     res.json(deviceModels);
   });
