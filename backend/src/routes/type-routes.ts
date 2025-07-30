@@ -21,6 +21,14 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     }
   );
 
+  const errorResponses = {
+    400: { description: 'Invalid request', content: { 'application/json': { schema: HttpErrorBody } } },
+    401: { description: 'Unauthorized', content: { 'application/json': { schema: HttpErrorBody } } },
+    404: { description: 'Device not found', content: { 'application/json': { schema: HttpErrorBody } } },
+    500: { description: 'Server error', content: { 'application/json': { schema: HttpErrorBody } } },
+  }
+
+
   const DeviceTypeSchema = z.object({
     typeId: TypeId,
     typeName: TypeName,
@@ -47,7 +55,8 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       200: {
         description: 'Device types returned',
         content: { 'application/json': { schema: z.array(DeviceTypeSchema) } }
-      }
+      },
+      ...errorResponses
     },
     tags: ['Device Types']
   });
@@ -91,10 +100,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device type found',
         content: { 'application/json': { schema: DeviceTypeSchema } }
       },
-      404: {
-        description: 'Device type not found',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Types']
   });
@@ -137,10 +143,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device type created',
         content: { 'application/json': { schema: z.object({ id: TypeId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Types']
   });
@@ -189,10 +192,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device type modified',
         content: { 'application/json': { schema: z.object({ id: TypeId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Types']
   });
@@ -239,10 +239,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device type deleted',
         content: { 'application/json': { schema: z.object({ id: TypeId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Types']
   });

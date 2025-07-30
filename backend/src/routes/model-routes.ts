@@ -21,6 +21,14 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     }
   );
 
+  const errorResponses = {
+    400: { description: 'Invalid request', content: { 'application/json': { schema: HttpErrorBody } } },
+    401: { description: 'Unauthorized', content: { 'application/json': { schema: HttpErrorBody } } },
+    404: { description: 'Device not found', content: { 'application/json': { schema: HttpErrorBody } } },
+    500: { description: 'Server error', content: { 'application/json': { schema: HttpErrorBody } } },
+  }
+
+
   const DeviceModelSchema = z.object({
     modelId: ModelId,
     modelName: ModelName,
@@ -46,11 +54,12 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
     request: {
       query: DeviceModelQueryParamsSchema,
     },
-    responses: {                                                                    // TODO: add 401
+    responses: {
       200: {
         description: 'Device models returned',
         content: { 'application/json': { schema: z.array(DeviceModelSchema) } }
-      }
+      },
+      ...errorResponses
     },
     tags: ['Device Models']
   });
@@ -99,10 +108,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device  model found',
         content: { 'application/json': { schema: DeviceModelSchema } }
       },
-      404: {
-        description: 'Device model not found',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Models']
   });
@@ -149,10 +155,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device model created',
         content: { 'application/json': { schema: z.object({ id: ModelId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Models']
   });
@@ -202,10 +205,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device model modified',
         content: { 'application/json': { schema: z.object({ id: ModelId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Models']
   });
@@ -252,10 +252,7 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
         description: 'Device model deleted',
         content: { 'application/json': { schema: z.object({ id: ModelId }) } }
       },
-      400: {
-        description: 'Invalid request',
-        content: { 'application/json': { schema: HttpErrorBody } }
-      }
+      ...errorResponses
     },
     tags: ['Device Models']
   });
