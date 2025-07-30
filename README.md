@@ -5,7 +5,6 @@ Demo backend and frontend application to manage a set of devices
 ## Quick Start with docker-compose
 
 Pre-requisites:
-- Node.js >= 24.4
 - Docker 
 
 Steps:
