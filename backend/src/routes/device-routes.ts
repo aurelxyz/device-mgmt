@@ -241,6 +241,32 @@ export const register = (app: Express, doc: OpenAPIRegistry, db: NodePgDatabase)
       throw httpError(400, z.prettifyError(input.error));
     }
 
+    if (input.data.status) {
+      const statuses = [
+        { name: 'stock', canTransitionFrom: ['stock', 'maintenance'] }, 
+        { name: 'installé', canTransitionFrom: ['installé', 'stock'] }, 
+        { name: 'maintenance', canTransitionFrom: ['maintenance', 'installé'] }
+      ];
+
+      const currentDevice = 
+        await db
+          .select({
+            id: deviceTable.id, 
+            status: deviceTable.status
+          })
+          .from(deviceTable)
+          .where(eq(deviceTable.id, params.data.id))
+        if (!currentDevice || currentDevice.length === 0) {
+          throw httpError(404, 'Device not found');
+        }
+        const currentStatus = currentDevice[0]?.status ?? '';
+        const acceptedPreviousStatuses = statuses.find(s => s.name === input.data.status)?.canTransitionFrom;
+
+        if (!acceptedPreviousStatuses?.includes(currentStatus)) {
+          throw httpError(400, `Cannot change status from ${currentStatus} to ${input.data.status}`);
+        }
+    }
+
     const updated = 
       await db
         .update(deviceTable)
